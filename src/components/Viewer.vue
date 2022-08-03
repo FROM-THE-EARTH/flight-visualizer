@@ -92,7 +92,7 @@ onMounted(() => {
   orbitControls.minDistance = 0.1;
   orbitControls.maxDistance = MAX_CAMERA_DISTANCE;
 
-  loadRocketModel(scene, "/rocket.obj", "/rocket_texture.png");
+  loadRocketModel(scene, `${import.meta.env.BASE_URL}rocket.obj`, `${import.meta.env.BASE_URL}rocket_texture.png`);
 
   // Rendering loop
   let previousTime = 0;

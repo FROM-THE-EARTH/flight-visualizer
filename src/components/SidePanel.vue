@@ -31,7 +31,7 @@ const openCSV = (e: Event) => {
 };
 
 const loadSample = () => {
-  fetch("/sample.csv")
+  fetch(`${import.meta.env.BASE_URL}sample.csv`)
     .then((res) => res.text())
     .then((res) => {
       emit("csvLoad", new FlightData(res), "sample.csv");
