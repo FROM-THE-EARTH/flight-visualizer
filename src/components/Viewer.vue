@@ -4,6 +4,11 @@
     <div id="bottom-panel">
       <div id="slider-truck">
         <div id="slider" ref="slider"></div>
+        <div class="ms-2">
+          <p>{{ props.flightData ? props.flightData.steps[flightStep].time : 0 }} s</p>
+          <label>Speed up </label>
+          <input type="number" class="ms-1" v-model="speedRate" min="0.1" max="20" />
+        </div>
       </div>
     </div>
   </div>
@@ -25,12 +30,14 @@ const props = defineProps({
 
 const MODEL_LENGTH = 100;
 const MAX_CAMERA_DISTANCE = MODEL_LENGTH * 2;
+const LAUNCH_ANGLE = 80;
 const Deg2Rad = Math.PI / 180;
 
 const view = ref<HTMLDivElement>();
 const slider = ref<HTMLDivElement>();
 let rocketObject: THREE.Group;
-let flightStep = 0;
+let flightStep = ref(0);
+let speedRate = ref(1.0);
 
 const loadRocketModel = (scene: THREE.Scene, modelUrl: string, textureUrl?: string) => {
   new OBJLoader().load(modelUrl, (obj) => {
@@ -43,6 +50,9 @@ const loadRocketModel = (scene: THREE.Scene, modelUrl: string, textureUrl?: stri
     })();
     const scale = MODEL_LENGTH / longitudinalLength;
     obj.scale.set(scale, scale, scale);
+
+    // Set launch angle
+    obj.rotateX(LAUNCH_ANGLE * Deg2Rad);
 
     // Set texture
     if (textureUrl) {
@@ -99,28 +109,23 @@ onMounted(() => {
   renderer.setAnimationLoop((time) => {
     if (props.flightData) {
       const sec = time / 1000;
-      const step = props.flightData.steps[flightStep];
-      const nextStep = props.flightData.steps[flightStep + 1];
+      const step = props.flightData.steps[flightStep.value];
+      const nextStep = props.flightData.steps[flightStep.value + 1];
       const timeInterval = nextStep.time - step.time;
-      if (previousTime + timeInterval <= sec) {
+      if (previousTime + timeInterval / speedRate.value <= sec) {
         previousTime = sec;
 
-        rocketObject.setRotationFromEuler(
-          new THREE.Euler(
-            step.gyro.x * timeInterval * Deg2Rad,
-            step.gyro.y * timeInterval * Deg2Rad,
-            step.gyro.z * timeInterval * Deg2Rad,
-            "XYZ",
-          ),
-        );
+        rocketObject.rotation.x += step.gyro.x * timeInterval * Deg2Rad;
+        rocketObject.rotation.y += step.gyro.y * timeInterval * Deg2Rad;
+        rocketObject.rotation.z += step.gyro.z * timeInterval * Deg2Rad;
 
-        flightStep++;
-        if (flightStep === props.flightData.steps.length - 1) {
-          flightStep = 0;
+        flightStep.value++;
+        if (flightStep.value === props.flightData.steps.length - 1) {
+          flightStep.value = 0;
         }
 
         // Update progress bar
-        slider.value!.style.width = `${(100 * flightStep) / props.flightData.steps.length}%`;
+        slider.value!.style.width = `${(100 * flightStep.value) / props.flightData.steps.length}%`;
       }
     }
 
