@@ -111,14 +111,6 @@ const recalculateRotation = () => {
   rotateRocket(0, flightStep.value);
 };
 
-const startAnimation = () => {
-  play.value = true;
-};
-
-const stopAnimation = () => {
-  play.value = false;
-};
-
 const togglePlay = () => {
   play.value = !play.value;
 };
