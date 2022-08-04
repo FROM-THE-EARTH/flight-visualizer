@@ -4,16 +4,19 @@
     <div id="bottom-panel">
       <div id="slider-truck">
         <div id="slider" ref="slider"></div>
-        <div class="ms-2">
-          <p>{{ props.flightData ? props.flightData.steps[flightStep].time : 0 }} s</p>
-          <label>Playback speed: x {{ playbackSpeed }}</label>
+      </div>
+      <div class="ms-2">
+        <p class="m-0">Time: {{ props.flightData ? props.flightData.steps[flightStep].time.toFixed(2) : "0.00" }} s</p>
+        <p class="m-0">Step: {{ flightStep }} / {{ props.flightData ? props.flightData.steps.length : 0 }}</p>
+        <div class="mt-2">
+          <label>Playback speed: x {{ playbackSpeed.toFixed(1) }}</label>
           <input
             type="range"
             class="form-range d-block"
             min="0.1"
             max="20"
             step="0.1"
-            v-model="playbackSpeed"
+            v-model.number="playbackSpeed"
             style="width: 200px"
           />
         </div>
@@ -165,11 +168,11 @@ onMounted(() => {
 }
 
 #view {
-  height: 85%;
+  height: 80%;
 }
 
 #bottom-panel {
-  height: 15%;
+  height: 20%;
 }
 
 #slider-truck {
