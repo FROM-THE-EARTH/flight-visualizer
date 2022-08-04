@@ -6,7 +6,7 @@
         type="range"
         class="form-range"
         min="0"
-        :max="props.flightData ? props.flightData.steps.length : 0"
+        :max="props.flightData ? props.flightData.steps.length - 2 : 0"
         @change="recalculateRotation"
         @pointerdown="seekStart"
         @pointerup="seekEnd"
