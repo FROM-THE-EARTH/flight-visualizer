@@ -6,8 +6,16 @@
         <div id="slider" ref="slider"></div>
         <div class="ms-2">
           <p>{{ props.flightData ? props.flightData.steps[flightStep].time : 0 }} s</p>
-          <label>Speed up </label>
-          <input type="number" class="ms-1" v-model="speedRate" min="0.1" max="20" />
+          <label>Playback speed: x {{ playbackSpeed }}</label>
+          <input
+            type="range"
+            class="form-range d-block"
+            min="0.1"
+            max="20"
+            step="0.1"
+            v-model="playbackSpeed"
+            style="width: 200px"
+          />
         </div>
       </div>
     </div>
@@ -15,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, PropType, watch } from "vue";
+import { onMounted, ref, PropType } from "vue";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
@@ -35,9 +43,10 @@ const Deg2Rad = Math.PI / 180;
 
 const view = ref<HTMLDivElement>();
 const slider = ref<HTMLDivElement>();
+
 let rocketObject: THREE.Group;
 let flightStep = ref(0);
-let speedRate = ref(1.0);
+let playbackSpeed = ref(1.0);
 
 const loadRocketModel = (scene: THREE.Scene, modelUrl: string, textureUrl?: string) => {
   new OBJLoader().load(modelUrl, (obj) => {
@@ -112,7 +121,7 @@ onMounted(() => {
       const step = props.flightData.steps[flightStep.value];
       const nextStep = props.flightData.steps[flightStep.value + 1];
       const timeInterval = nextStep.time - step.time;
-      if (previousTime + timeInterval / speedRate.value <= sec) {
+      if (previousTime + timeInterval / playbackSpeed.value <= sec) {
         previousTime = sec;
 
         rocketObject.rotation.x += step.gyro.x * timeInterval * Deg2Rad;
