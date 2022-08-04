@@ -23,23 +23,27 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, PropType } from "vue";
+import { onMounted, ref, PropType, watch } from "vue";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 import { FlightData } from "../modules/flightData";
+import { FlightCondition } from "../modules/flightCondition";
+
+const MODEL_LENGTH = 100;
+const MAX_CAMERA_DISTANCE = MODEL_LENGTH * 2;
+const Deg2Rad = Math.PI / 180;
 
 const props = defineProps({
   flightData: {
     type: Object as PropType<FlightData | undefined>,
     required: true,
   },
+  flightCondition: {
+    type: Object as PropType<FlightCondition>,
+    required: true,
+  },
 });
-
-const MODEL_LENGTH = 100;
-const MAX_CAMERA_DISTANCE = MODEL_LENGTH * 2;
-const LAUNCH_ANGLE = 80;
-const Deg2Rad = Math.PI / 180;
 
 const view = ref<HTMLDivElement>();
 const slider = ref<HTMLDivElement>();
@@ -47,6 +51,16 @@ const slider = ref<HTMLDivElement>();
 let rocketObject: THREE.Group;
 let flightStep = ref(0);
 let playbackSpeed = ref(1.0);
+
+let previousLaunchAngle = 0;
+const setLaunchAngle = (angle: number) => {
+  rocketObject.rotateX((angle - previousLaunchAngle) * Deg2Rad);
+  previousLaunchAngle = angle;
+};
+
+watch(props.flightCondition, (cond) => {
+  setLaunchAngle(cond.launchAngle);
+});
 
 const loadRocketModel = (scene: THREE.Scene, modelUrl: string, textureUrl?: string) => {
   new OBJLoader().load(modelUrl, (obj) => {
@@ -60,8 +74,7 @@ const loadRocketModel = (scene: THREE.Scene, modelUrl: string, textureUrl?: stri
     const scale = MODEL_LENGTH / longitudinalLength;
     obj.scale.set(scale, scale, scale);
 
-    // Set launch angle
-    obj.rotateX(LAUNCH_ANGLE * Deg2Rad);
+    setLaunchAngle(props.flightCondition.launchAngle);
 
     // Set texture
     if (textureUrl) {
@@ -124,9 +137,10 @@ onMounted(() => {
       if (previousTime + timeInterval / playbackSpeed.value <= sec) {
         previousTime = sec;
 
-        rocketObject.rotation.x += step.gyro.x * timeInterval * Deg2Rad;
-        rocketObject.rotation.y += step.gyro.y * timeInterval * Deg2Rad;
-        rocketObject.rotation.z += step.gyro.z * timeInterval * Deg2Rad;
+        const k = timeInterval * Deg2Rad;
+        rocketObject.rotateX(step.gyro.x * k);
+        rocketObject.rotateY(step.gyro.y * k);
+        rocketObject.rotateZ(step.gyro.z * k);
 
         flightStep.value++;
         if (flightStep.value === props.flightData.steps.length - 1) {

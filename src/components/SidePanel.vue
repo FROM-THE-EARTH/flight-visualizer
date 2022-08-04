@@ -1,22 +1,44 @@
 <template>
   <div id="side-panel">
-    <button class="btn btn-primary rounded-0" @click="clickInputButton">Open CSV</button>
-    <button class="btn btn-primary rounded-0 border-top border-dark" @click="loadSample">Load Sample</button>
+    <button class="btn btn-primary rounded-0 border-dark" @click="clickInputButton">Open CSV</button>
+    <button class="btn btn-primary rounded-0 border-dark" @click="loadSample">Load Sample</button>
     <input ref="inputButton" type="file" accept=".csv" hidden @change="openCSV" />
+    <div class="ms-2 mt-4">
+      <p class="lead m-0">Flight Condition</p>
+      <div class="ms-1">
+        <label>Launch angle [deg]</label>
+        <input type="number" class="d-block" v-model="props.flightCondition.launchAngle" min="0" max="90" />
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed } from "@vue/reactivity";
+import { ref, PropType } from "vue";
 import { FlightData } from "../modules/flightData";
+import { FlightCondition } from "../modules/flightCondition";
 
-interface Emits {
+const props = defineProps({
+  flightCondition: {
+    type: Object as PropType<FlightCondition>,
+    required: true,
+  },
+});
+
+const emit = defineEmits<{
   (e: "csvLoad", flightData: FlightData, filename: string): void;
-}
-
-const emit = defineEmits<Emits>();
+  (e: "update:flightCondition", value: FlightCondition): FlightCondition;
+}>();
 
 const inputButton = ref<HTMLInputElement>();
+
+computed({
+  get: () => props.flightCondition,
+  set: (value) => {
+    emit("update:flightCondition", value);
+  },
+});
 
 const clickInputButton = () => {
   inputButton.value?.click();
