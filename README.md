@@ -7,18 +7,19 @@
 - [Node.js](https://nodejs.org/ja/)
 - Yarn
 
-## Development
+## Setup
 
 ```bash
 git clone https://github.com/FROM-THE-EARTH/flight-visualizer.git
 cd flight-visualizer
 yarn
-yarn dev
 ```
 
 ## Scripts
 
-`package.json`の `scripts`の説明です。`yarn ***`で実行できます。
+`package.json`の `scripts`の説明です。
+
+以下のコマンドをターミナルで`yarn {command}`とすると実行できます。
 
 - `dev`: 開発用にローカルでサーバーを立ち上げ、現在のソースコードをブラウザで実行可能にします。ホットリロード対応です。
 - `build`: 公開用にアプリをビルドします。ビルドしたファイルは `dist/`に保存されます。
