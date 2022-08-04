@@ -8,16 +8,21 @@
         min="0"
         :max="props.flightData ? props.flightData.steps.length - 2 : 0"
         @change="recalculateRotation"
-        @pointerdown="seekStart"
-        @pointerup="seekEnd"
+        @pointerdown="startSeek"
+        @pointerup="stopSeek"
         v-model.number="flightStep"
       />
       <div class="ms-2">
-        <p class="m-0">
-          Time: {{ props.flightData ? props.flightData.steps[flightStep].time.toFixed(2) : "0.00" }} /
-          {{ props.flightData ? props.flightData.steps[props.flightData.steps.length - 1].time.toFixed(2) : "0.00" }} s
+        <button class="btn btn-primary rounded-0 px-2 py-1" @click="togglePlay" :disabled="!props.flightData">
+          {{ props.flightData && play ? "■" : "▶" }}
+        </button>
+        <p class="m-0 ms-2 d-inline">
+          Time {{ props.flightData ? props.flightData.steps[flightStep].time.toFixed(2) : "0.00" }} /
+          {{ props.flightData ? props.flightData.steps[props.flightData.steps.length - 1].time.toFixed(2) : "0.00" }}
         </p>
-        <p class="m-0">Step: {{ flightStep }} / {{ props.flightData ? props.flightData.steps.length : 0 }}</p>
+        <p class="m-0 ms-3 d-inline">
+          Step {{ flightStep }} / {{ props.flightData ? props.flightData.steps.length : 0 }}
+        </p>
         <div class="mt-2">
           <label>Playback speed: x {{ playbackSpeed.toFixed(1) }}</label>
           <input
@@ -63,6 +68,7 @@ const view = ref<HTMLDivElement>();
 let rocketObject: THREE.Group;
 let flightStep = ref(0);
 let playbackSpeed = ref(1.0);
+let play = ref(true);
 let seeking = false;
 
 let previousLaunchAngle = 0;
@@ -105,11 +111,23 @@ const recalculateRotation = () => {
   rotateRocket(0, flightStep.value);
 };
 
-const seekStart = () => {
+const startAnimation = () => {
+  play.value = true;
+};
+
+const stopAnimation = () => {
+  play.value = false;
+};
+
+const togglePlay = () => {
+  play.value = !play.value;
+};
+
+const startSeek = () => {
   seeking = true;
 };
 
-const seekEnd = () => {
+const stopSeek = () => {
   seeking = false;
 };
 
@@ -184,7 +202,7 @@ onMounted(() => {
   // Rendering loop
   let previousTime = 0;
   renderer.setAnimationLoop((time) => {
-    if (props.flightData && !seeking) {
+    if (props.flightData && play.value && !seeking) {
       const sec = time / 1000;
       const step = props.flightData.steps[flightStep.value];
       const nextStep = props.flightData.steps[flightStep.value + 1];
