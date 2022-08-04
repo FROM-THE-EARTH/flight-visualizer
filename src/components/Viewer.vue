@@ -4,10 +4,21 @@
     <div id="bottom-panel">
       <div id="slider-truck">
         <div id="slider" ref="slider"></div>
-        <div class="ms-2">
-          <p>{{ props.flightData ? props.flightData.steps[flightStep].time : 0 }} s</p>
-          <label>Speed up </label>
-          <input type="number" class="ms-1" v-model="speedRate" min="0.1" max="20" />
+      </div>
+      <div class="ms-2">
+        <p class="m-0">Time: {{ props.flightData ? props.flightData.steps[flightStep].time.toFixed(2) : "0.00" }} s</p>
+        <p class="m-0">Step: {{ flightStep }} / {{ props.flightData ? props.flightData.steps.length : 0 }}</p>
+        <div class="mt-2">
+          <label>Playback speed: x {{ playbackSpeed.toFixed(1) }}</label>
+          <input
+            type="range"
+            class="form-range d-block"
+            min="0.1"
+            max="20"
+            step="0.1"
+            v-model.number="playbackSpeed"
+            style="width: 200px"
+          />
         </div>
       </div>
     </div>
@@ -20,24 +31,39 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 import { FlightData } from "../modules/flightData";
+import { FlightCondition } from "../modules/flightCondition";
+
+const MODEL_LENGTH = 100;
+const MAX_CAMERA_DISTANCE = MODEL_LENGTH * 2;
+const Deg2Rad = Math.PI / 180;
 
 const props = defineProps({
   flightData: {
     type: Object as PropType<FlightData | undefined>,
     required: true,
   },
+  flightCondition: {
+    type: Object as PropType<FlightCondition>,
+    required: true,
+  },
 });
-
-const MODEL_LENGTH = 100;
-const MAX_CAMERA_DISTANCE = MODEL_LENGTH * 2;
-const LAUNCH_ANGLE = 80;
-const Deg2Rad = Math.PI / 180;
 
 const view = ref<HTMLDivElement>();
 const slider = ref<HTMLDivElement>();
+
 let rocketObject: THREE.Group;
 let flightStep = ref(0);
-let speedRate = ref(1.0);
+let playbackSpeed = ref(1.0);
+
+let previousLaunchAngle = 0;
+const setLaunchAngle = (angle: number) => {
+  rocketObject.rotateX((angle - previousLaunchAngle) * Deg2Rad);
+  previousLaunchAngle = angle;
+};
+
+watch(props.flightCondition, (cond) => {
+  setLaunchAngle(cond.launchAngle);
+});
 
 const loadRocketModel = (scene: THREE.Scene, modelUrl: string, textureUrl?: string) => {
   new OBJLoader().load(modelUrl, (obj) => {
@@ -51,8 +77,7 @@ const loadRocketModel = (scene: THREE.Scene, modelUrl: string, textureUrl?: stri
     const scale = MODEL_LENGTH / longitudinalLength;
     obj.scale.set(scale, scale, scale);
 
-    // Set launch angle
-    obj.rotateX(LAUNCH_ANGLE * Deg2Rad);
+    setLaunchAngle(props.flightCondition.launchAngle);
 
     // Set texture
     if (textureUrl) {
@@ -112,12 +137,16 @@ onMounted(() => {
       const step = props.flightData.steps[flightStep.value];
       const nextStep = props.flightData.steps[flightStep.value + 1];
       const timeInterval = nextStep.time - step.time;
-      if (previousTime + timeInterval / speedRate.value <= sec) {
+      if (previousTime + timeInterval / playbackSpeed.value <= sec) {
         previousTime = sec;
 
-        rocketObject.rotation.x += step.gyro.x * timeInterval * Deg2Rad;
-        rocketObject.rotation.y += step.gyro.y * timeInterval * Deg2Rad;
-        rocketObject.rotation.z += step.gyro.z * timeInterval * Deg2Rad;
+        const k = timeInterval * Deg2Rad;
+
+        const bodyQuaternion = new THREE.Quaternion().setFromEuler(rocketObject.rotation);
+        const rotation = new THREE.Quaternion().setFromEuler(
+          new THREE.Euler(step.gyro.x * k, step.gyro.y * k, step.gyro.z * k),
+        );
+        rocketObject.setRotationFromQuaternion(bodyQuaternion.multiply(rotation));
 
         flightStep.value++;
         if (flightStep.value === props.flightData.steps.length - 1) {
@@ -142,11 +171,11 @@ onMounted(() => {
 }
 
 #view {
-  height: 85%;
+  height: 80%;
 }
 
 #bottom-panel {
-  height: 15%;
+  height: 20%;
 }
 
 #slider-truck {
