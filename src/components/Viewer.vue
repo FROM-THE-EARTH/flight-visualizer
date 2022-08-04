@@ -1,18 +1,42 @@
 <template>
   <div id="viewer">
     <div id="view" ref="view"></div>
+    <div id="height-graph" ref="heightGraph"></div>
     <div id="bottom-panel">
-      <div id="slider-truck">
-        <div id="slider" ref="slider"></div>
+      <div>
+        <button
+          class="btn btn-primary rounded-0 px-2 py-1"
+          @click="togglePlay"
+          :disabled="!props.flightData"
+          style="width: 50px; margin-right: 10px"
+        >
+          {{ props.flightData && play ? "■" : "▶" }}
+        </button>
+        <input
+          type="range"
+          class="form-range align-middle"
+          min="0"
+          :max="props.flightData ? props.flightData.steps.length - 2 : 0"
+          @change="recalculateRotation"
+          @pointerdown="startSeek"
+          @pointerup="stopSeek"
+          v-model.number="flightStep"
+          style="width: calc(100% - 60px); padding-right: 10px"
+        />
       </div>
-      <div class="ms-2">
-        <p class="m-0">Time: {{ props.flightData ? props.flightData.steps[flightStep].time.toFixed(2) : "0.00" }} s</p>
-        <p class="m-0">Step: {{ flightStep }} / {{ props.flightData ? props.flightData.steps.length : 0 }}</p>
-        <div class="mt-2">
+      <div style="margin-left: 60px">
+        <p class="m-0 d-inline">
+          Time {{ props.flightData ? props.flightData.steps[flightStep].time.toFixed(2) : "0.00" }} /
+          {{ props.flightData ? props.flightData.steps[props.flightData.steps.length - 1].time.toFixed(2) : "0.00" }}
+        </p>
+        <p class="m-0 ms-4 d-inline">
+          Step {{ flightStep }} / {{ props.flightData ? props.flightData.steps.length : 0 }}
+        </p>
+        <div class="ms-4 d-inline">
           <label>Playback speed: x {{ playbackSpeed.toFixed(1) }}</label>
           <input
             type="range"
-            class="form-range d-block"
+            class="form-range d-inline align-middle ms-2"
             min="0.1"
             max="20"
             step="0.1"
@@ -26,12 +50,13 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, PropType, watch } from "vue";
+import { onMounted, ref, PropType, watch, toRefs } from "vue";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 import { FlightData } from "../modules/flightData";
 import { FlightCondition } from "../modules/flightCondition";
+import plotly from "plotly.js-dist-min";
 
 const MODEL_LENGTH = 100;
 const MAX_CAMERA_DISTANCE = MODEL_LENGTH * 2;
@@ -49,11 +74,13 @@ const props = defineProps({
 });
 
 const view = ref<HTMLDivElement>();
-const slider = ref<HTMLDivElement>();
+const heightGraph = ref<HTMLDivElement>();
 
 let rocketObject: THREE.Group;
 let flightStep = ref(0);
 let playbackSpeed = ref(1.0);
+let play = ref(true);
+let seeking = false;
 
 let previousLaunchAngle = 0;
 const setLaunchAngle = (angle: number) => {
@@ -61,9 +88,51 @@ const setLaunchAngle = (angle: number) => {
   previousLaunchAngle = angle;
 };
 
-watch(props.flightCondition, (cond) => {
-  setLaunchAngle(cond.launchAngle);
-});
+const initializeRocketAngle = () => {
+  previousLaunchAngle = 0;
+  rocketObject.setRotationFromEuler(new THREE.Euler(0, 0, 0));
+  setLaunchAngle(props.flightCondition.launchAngle);
+};
+
+const rotateRocket = (start: number, end: number) => {
+  if (!props.flightData) {
+    return;
+  }
+
+  for (let i = start; i < end; i++) {
+    const step = props.flightData.steps[i];
+    const nextStep = props.flightData.steps[i + 1];
+    const dt = nextStep.time - step.time;
+    const k = dt * Deg2Rad;
+
+    const bodyQuaternion = new THREE.Quaternion().setFromEuler(rocketObject.rotation);
+    const rotation = new THREE.Quaternion().setFromEuler(
+      new THREE.Euler(step.gyro.x * k, step.gyro.y * k, step.gyro.z * k),
+    );
+    rocketObject.setRotationFromQuaternion(bodyQuaternion.multiply(rotation));
+  }
+};
+
+const recalculateRotation = () => {
+  if (!props.flightData) {
+    return;
+  }
+
+  initializeRocketAngle();
+  rotateRocket(0, flightStep.value);
+};
+
+const togglePlay = () => {
+  play.value = !play.value;
+};
+
+const startSeek = () => {
+  seeking = true;
+};
+
+const stopSeek = () => {
+  seeking = false;
+};
 
 const loadRocketModel = (scene: THREE.Scene, modelUrl: string, textureUrl?: string) => {
   new OBJLoader().load(modelUrl, (obj) => {
@@ -93,10 +162,61 @@ const loadRocketModel = (scene: THREE.Scene, modelUrl: string, textureUrl?: stri
   });
 };
 
+const setupGraph = (data?: plotly.Data[]) => {
+  const layout: Partial<plotly.Layout> = {
+    plot_bgcolor: "#404040",
+    paper_bgcolor: "#404040",
+    margin: {
+      t: 10,
+      b: 30,
+      l: 60,
+      r: 10,
+    },
+    xaxis: {
+      title: "Time [s]",
+      color: "#ffffff",
+      gridcolor: "#ffffff",
+    },
+    yaxis: {
+      title: "Height [m]",
+      color: "#ffffff",
+      gridcolor: "#ffffff",
+    },
+    showlegend: false,
+  };
+
+  plotly.newPlot(heightGraph.value!, data ?? [], layout);
+};
+
+const plotFlightData = () => {
+  if (!props.flightData) {
+    return;
+  }
+
+  let trace: plotly.Data = {
+    x: props.flightData.steps.map((step) => step.time),
+    y: props.flightData.steps.map((step) => step.height),
+    type: "scatter",
+  };
+
+  setupGraph([trace]);
+};
+
+watch(props.flightCondition, (cond) => {
+  setLaunchAngle(cond.launchAngle);
+});
+
+const { flightData } = toRefs(props);
+watch(flightData, () => {
+  plotFlightData();
+});
+
 onMounted(() => {
   if (!view.value) {
     return;
   }
+
+  setupGraph();
 
   // Initialize scene
   const scene = new THREE.Scene();
@@ -132,29 +252,21 @@ onMounted(() => {
   // Rendering loop
   let previousTime = 0;
   renderer.setAnimationLoop((time) => {
-    if (props.flightData) {
+    if (props.flightData && play.value && !seeking) {
       const sec = time / 1000;
       const step = props.flightData.steps[flightStep.value];
       const nextStep = props.flightData.steps[flightStep.value + 1];
-      const timeInterval = nextStep.time - step.time;
-      if (previousTime + timeInterval / playbackSpeed.value <= sec) {
+      const dt = nextStep.time - step.time;
+      if (previousTime + dt / playbackSpeed.value <= sec) {
+        rotateRocket(flightStep.value, flightStep.value + 1);
+
         previousTime = sec;
-
-        const k = timeInterval * Deg2Rad;
-
-        const bodyQuaternion = new THREE.Quaternion().setFromEuler(rocketObject.rotation);
-        const rotation = new THREE.Quaternion().setFromEuler(
-          new THREE.Euler(step.gyro.x * k, step.gyro.y * k, step.gyro.z * k),
-        );
-        rocketObject.setRotationFromQuaternion(bodyQuaternion.multiply(rotation));
-
         flightStep.value++;
+
         if (flightStep.value === props.flightData.steps.length - 1) {
           flightStep.value = 0;
+          initializeRocketAngle();
         }
-
-        // Update progress bar
-        slider.value!.style.width = `${(100 * flightStep.value) / props.flightData.steps.length}%`;
       }
     }
 
@@ -171,21 +283,14 @@ onMounted(() => {
 }
 
 #view {
-  height: 80%;
+  height: 60%;
+}
+
+#height-graph {
+  height: 20%;
 }
 
 #bottom-panel {
   height: 20%;
-}
-
-#slider-truck {
-  width: 100%;
-  height: 10px;
-  background-color: white;
-}
-
-#slider {
-  height: 100%;
-  background-color: rgb(64, 71, 203);
 }
 </style>
