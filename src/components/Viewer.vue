@@ -141,9 +141,12 @@ onMounted(() => {
         previousTime = sec;
 
         const k = timeInterval * Deg2Rad;
-        rocketObject.rotateX(step.gyro.x * k);
-        rocketObject.rotateY(step.gyro.y * k);
-        rocketObject.rotateZ(step.gyro.z * k);
+
+        const bodyQuaternion = new THREE.Quaternion().setFromEuler(rocketObject.rotation);
+        const rotation = new THREE.Quaternion().setFromEuler(
+          new THREE.Euler(step.gyro.x * k, step.gyro.y * k, step.gyro.z * k),
+        );
+        rocketObject.setRotationFromQuaternion(bodyQuaternion.multiply(rotation));
 
         flightStep.value++;
         if (flightStep.value === props.flightData.steps.length - 1) {
