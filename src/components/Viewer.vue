@@ -1,33 +1,42 @@
 <template>
   <div id="viewer">
     <div id="view" ref="view"></div>
+    <div id="height-graph" ref="heightGraph"></div>
     <div id="bottom-panel">
-      <input
-        type="range"
-        class="form-range"
-        min="0"
-        :max="props.flightData ? props.flightData.steps.length - 2 : 0"
-        @change="recalculateRotation"
-        @pointerdown="startSeek"
-        @pointerup="stopSeek"
-        v-model.number="flightStep"
-      />
-      <div class="ms-2">
-        <button class="btn btn-primary rounded-0 px-2 py-1" @click="togglePlay" :disabled="!props.flightData">
+      <div>
+        <button
+          class="btn btn-primary rounded-0 px-2 py-1"
+          @click="togglePlay"
+          :disabled="!props.flightData"
+          style="width: 50px; margin-right: 10px"
+        >
           {{ props.flightData && play ? "■" : "▶" }}
         </button>
-        <p class="m-0 ms-2 d-inline">
+        <input
+          type="range"
+          class="form-range align-middle"
+          min="0"
+          :max="props.flightData ? props.flightData.steps.length - 2 : 0"
+          @change="recalculateRotation"
+          @pointerdown="startSeek"
+          @pointerup="stopSeek"
+          v-model.number="flightStep"
+          style="width: calc(100% - 60px); padding-right: 10px"
+        />
+      </div>
+      <div style="margin-left: 60px">
+        <p class="m-0 d-inline">
           Time {{ props.flightData ? props.flightData.steps[flightStep].time.toFixed(2) : "0.00" }} /
           {{ props.flightData ? props.flightData.steps[props.flightData.steps.length - 1].time.toFixed(2) : "0.00" }}
         </p>
-        <p class="m-0 ms-3 d-inline">
+        <p class="m-0 ms-4 d-inline">
           Step {{ flightStep }} / {{ props.flightData ? props.flightData.steps.length : 0 }}
         </p>
-        <div class="mt-2">
+        <div class="ms-4 d-inline">
           <label>Playback speed: x {{ playbackSpeed.toFixed(1) }}</label>
           <input
             type="range"
-            class="form-range d-block"
+            class="form-range d-inline align-middle ms-2"
             min="0.1"
             max="20"
             step="0.1"
@@ -41,12 +50,13 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, PropType, watch } from "vue";
+import { onMounted, ref, PropType, watch, toRefs } from "vue";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 import { FlightData } from "../modules/flightData";
 import { FlightCondition } from "../modules/flightCondition";
+import plotly from "plotly.js-dist-min";
 
 const MODEL_LENGTH = 100;
 const MAX_CAMERA_DISTANCE = MODEL_LENGTH * 2;
@@ -64,6 +74,7 @@ const props = defineProps({
 });
 
 const view = ref<HTMLDivElement>();
+const heightGraph = ref<HTMLDivElement>();
 
 let rocketObject: THREE.Group;
 let flightStep = ref(0);
@@ -123,10 +134,6 @@ const stopSeek = () => {
   seeking = false;
 };
 
-watch(props.flightCondition, (cond) => {
-  setLaunchAngle(cond.launchAngle);
-});
-
 const loadRocketModel = (scene: THREE.Scene, modelUrl: string, textureUrl?: string) => {
   new OBJLoader().load(modelUrl, (obj) => {
     rocketObject = obj;
@@ -155,10 +162,61 @@ const loadRocketModel = (scene: THREE.Scene, modelUrl: string, textureUrl?: stri
   });
 };
 
+const setupGraph = (data?: plotly.Data[]) => {
+  const layout: Partial<plotly.Layout> = {
+    plot_bgcolor: "#404040",
+    paper_bgcolor: "#404040",
+    margin: {
+      t: 10,
+      b: 30,
+      l: 60,
+      r: 10,
+    },
+    xaxis: {
+      title: "Time [s]",
+      color: "#ffffff",
+      gridcolor: "#ffffff",
+    },
+    yaxis: {
+      title: "Height [m]",
+      color: "#ffffff",
+      gridcolor: "#ffffff",
+    },
+    showlegend: false,
+  };
+
+  plotly.newPlot(heightGraph.value!, data ?? [], layout);
+};
+
+const plotFlightData = () => {
+  if (!props.flightData) {
+    return;
+  }
+
+  let trace: plotly.Data = {
+    x: props.flightData.steps.map((step) => step.time),
+    y: props.flightData.steps.map((step) => step.height),
+    type: "scatter",
+  };
+
+  setupGraph([trace]);
+};
+
+watch(props.flightCondition, (cond) => {
+  setLaunchAngle(cond.launchAngle);
+});
+
+const { flightData } = toRefs(props);
+watch(flightData, () => {
+  plotFlightData();
+});
+
 onMounted(() => {
   if (!view.value) {
     return;
   }
+
+  setupGraph();
 
   // Initialize scene
   const scene = new THREE.Scene();
@@ -225,7 +283,11 @@ onMounted(() => {
 }
 
 #view {
-  height: 80%;
+  height: 60%;
+}
+
+#height-graph {
+  height: 20%;
 }
 
 #bottom-panel {
