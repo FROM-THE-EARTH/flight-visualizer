@@ -7,6 +7,7 @@ export type Gyro = {
 export type FlightDataStep = {
     time: number    // [s]
     gyro: Gyro      // [deg/s]
+    height: number  // [m]
 }
 
 export class FlightData {
@@ -17,7 +18,7 @@ export class FlightData {
         for (const line of lines) {
             const cells = line.split(",")
 
-            if (cells.length !== 4) {
+            if (cells.length !== 5) {
                 continue;
             }
 
@@ -33,7 +34,8 @@ export class FlightData {
                 this.steps.push({
                     time: cellsNumber[0], gyro: {
                         x: cellsNumber[1], y: cellsNumber[2], z: cellsNumber[3]
-                    }
+                    },
+                    height: cellsNumber[4]
                 })
             } catch { };
         }
