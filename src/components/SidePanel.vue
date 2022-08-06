@@ -8,6 +8,8 @@
       <div class="ms-1">
         <label>Launch angle [deg]</label>
         <input type="number" class="d-block" v-model="props.flightCondition.launchAngle" min="0" max="90" />
+        <label>Launch azimuth [deg]</label>
+        <input type="number" class="d-block" v-model="props.flightCondition.azimuth" min="0" max="360" />
       </div>
     </div>
   </div>

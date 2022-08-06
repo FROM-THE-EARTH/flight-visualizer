@@ -1,3 +1,4 @@
 export type FlightCondition = {
-    launchAngle: number; // [deg]
+    launchAngle: number;    // [deg]
+    azimuth: number;        // [deg]
 }

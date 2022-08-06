@@ -93,10 +93,18 @@ const setLaunchAngle = (angle: number) => {
   previousLaunchAngle = angle;
 };
 
+let previousAzimutgh = 0;
+const setAzimuth = (azimuth: number) => {
+  rocketObject.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), (azimuth - previousAzimutgh) * Deg2Rad);
+  previousAzimutgh = azimuth;
+};
+
 const initializeRocketAngle = () => {
   previousLaunchAngle = 0;
+  previousAzimutgh = 0;
   rocketObject.setRotationFromEuler(new THREE.Euler(0, 0, 0));
   setLaunchAngle(props.flightCondition.launchAngle);
+  setAzimuth(props.flightCondition.azimuth);
 };
 
 const rotateRocket = (start: number, end: number) => {
@@ -209,6 +217,7 @@ const plotFlightData = () => {
 
 watch(props.flightCondition, (cond) => {
   setLaunchAngle(cond.launchAngle);
+  setAzimuth(cond.azimuth);
 });
 
 const { flightData } = toRefs(props);
