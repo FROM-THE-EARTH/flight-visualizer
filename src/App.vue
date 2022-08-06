@@ -20,6 +20,7 @@ import { FlightCondition } from "./modules/flightCondition";
 let flightData = ref<FlightData>();
 let flightCondition = ref<FlightCondition>({
   launchAngle: 70,
+  azimuth: 0,
 });
 
 let csvFileName = ref<string>();
