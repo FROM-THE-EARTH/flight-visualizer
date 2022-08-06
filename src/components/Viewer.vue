@@ -3,46 +3,51 @@
     <div id="view" ref="view"></div>
     <div id="height-graph" ref="heightGraph"></div>
     <div id="bottom-panel">
-      <div>
+      <div class="d-flex">
         <button
           class="btn btn-primary rounded-0 px-2 py-1"
           @click="togglePlay"
           :disabled="!props.flightData"
-          style="width: 50px; margin-right: 10px"
+          style="width: 50px"
         >
           {{ props.flightData && play ? "■" : "▶" }}
         </button>
-        <input
-          type="range"
-          class="form-range align-middle"
-          min="0"
-          :max="props.flightData ? props.flightData.steps.length - 2 : 0"
-          @change="recalculateRotation"
-          @pointerdown="startSeek"
-          @pointerup="stopSeek"
-          v-model.number="flightStep"
-          style="width: calc(100% - 60px); padding-right: 10px"
-        />
-      </div>
-      <div style="margin-left: 60px">
-        <p class="m-0 d-inline">
-          Time {{ props.flightData ? props.flightData.steps[flightStep].time.toFixed(2) : "0.00" }} /
-          {{ props.flightData ? props.flightData.steps[props.flightData.steps.length - 1].time.toFixed(2) : "0.00" }}
-        </p>
-        <p class="m-0 ms-4 d-inline">
-          Step {{ flightStep }} / {{ props.flightData ? props.flightData.steps.length : 0 }}
-        </p>
-        <div class="ms-4 d-inline">
-          <label>Playback speed: x {{ playbackSpeed.toFixed(1) }}</label>
+        <div class="w-100" style="padding-left: 10px; padding-right: 10px">
           <input
             type="range"
-            class="form-range d-inline align-middle ms-2"
-            min="0.1"
-            max="20"
-            step="0.1"
-            v-model.number="playbackSpeed"
-            style="width: 200px"
+            class="form-range align-middle"
+            min="0"
+            :max="props.flightData ? props.flightData.steps.length - 2 : 0"
+            @change="recalculateRotation"
+            @pointerdown="startSeek"
+            @pointerup="stopSeek"
+            v-model.number="flightStep"
           />
+          <div class="d-flex">
+            <div>
+              <p class="d-inline">
+                Time {{ props.flightData ? props.flightData.steps[flightStep].time.toFixed(2) : "0.00" }} /
+                {{
+                  props.flightData ? props.flightData.steps[props.flightData.steps.length - 1].time.toFixed(2) : "0.00"
+                }}
+              </p>
+              <p class="ms-4 d-inline">
+                Step {{ flightStep }} / {{ props.flightData ? props.flightData.steps.length : 0 }}
+              </p>
+            </div>
+            <div class="ms-auto d-inline">
+              <label>Playback speed: x {{ playbackSpeed.toFixed(1) }}</label>
+              <input
+                type="range"
+                class="form-range d-inline align-middle ms-2"
+                min="0.1"
+                max="20"
+                step="0.1"
+                v-model.number="playbackSpeed"
+                style="width: 200px"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
