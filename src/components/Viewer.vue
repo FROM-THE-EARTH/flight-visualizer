@@ -88,7 +88,7 @@ const heightGraph = ref<HTMLDivElement>();
 
 let rocketObject: THREE.Group;
 let globalAxes = new THREE.AxesHelper(MAX_CAMERA_DISTANCE);
-let rocketAxes = new THREE.AxesHelper(MODEL_LENGTH / 3);
+let rocketAxes = new THREE.AxesHelper(1);
 
 let flightStep = ref(0);
 let playbackSpeed = ref(1.0);
