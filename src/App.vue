@@ -4,8 +4,12 @@
       <p class="m-0">Flight Visualizer {{ csvFileName ? ` - ${csvFileName}` : "" }}</p>
     </div>
     <div id="main" class="row g-0">
-      <div class="col-2"><SidePanel @csv-load="onCSVLoad" :flight-condition="flightCondition" /></div>
-      <div class="col-10"><Viewer ref="viewer" :flightData="flightData" :flight-condition="flightCondition" /></div>
+      <div class="col-2">
+        <SidePanel @csv-load="onCSVLoad" :flight-condition="flightCondition" :view-setting="viewSetting" />
+      </div>
+      <div class="col-10">
+        <Viewer ref="viewer" :flightData="flightData" :flight-condition="flightCondition" :view-setting="viewSetting" />
+      </div>
     </div>
   </div>
 </template>
@@ -16,11 +20,16 @@ import SidePanel from "./components/SidePanel.vue";
 import Viewer from "./components/Viewer.vue";
 import { FlightData } from "./modules/flightData";
 import { FlightCondition } from "./modules/flightCondition";
+import { ViewSetting } from "./modules/viewSetting";
 
 let flightData = ref<FlightData>();
 let flightCondition = ref<FlightCondition>({
   launchAngle: 70,
   azimuth: 0,
+});
+let viewSetting = ref<ViewSetting>({
+  drawGlobalAxis: true,
+  drawModelAxis: true,
 });
 
 let csvFileName = ref<string>();
