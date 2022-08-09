@@ -26,6 +26,7 @@ let flightData = ref<FlightData>();
 let flightCondition = ref<FlightCondition>({
   launchAngle: 70,
   azimuth: 0,
+  bodyRolling: 0,
 });
 let viewSetting = ref<ViewSetting>({
   drawGlobalAxes: true,

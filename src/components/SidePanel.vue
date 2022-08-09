@@ -9,7 +9,9 @@
         <label>Launch angle [deg]</label>
         <input type="number" class="d-block" v-model="props.flightCondition.launchAngle" min="0" max="180" />
         <label>Launch azimuth [deg]</label>
-        <input type="number" class="d-block" v-model="props.flightCondition.azimuth" min="0" max="360" />
+        <input type="number" class="d-block" v-model="props.flightCondition.azimuth" min="0" max="359" />
+        <label>Body rolling [deg]</label>
+        <input type="number" class="d-block" v-model="props.flightCondition.bodyRolling" min="0" max="359" />
       </div>
     </div>
     <div class="ms-2 mt-4">
