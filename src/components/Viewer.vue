@@ -320,7 +320,7 @@ onMounted(() => {
 }
 
 #view {
-  height: calc(80% - 70px);
+  height: calc(80% - 53px);
   background: linear-gradient(0deg, rgb(34, 58, 100), rgb(9, 0, 26));
 }
 
@@ -329,6 +329,6 @@ onMounted(() => {
 }
 
 #bottom-panel {
-  height: 60px;
+  height: 53px;
 }
 </style>
