@@ -61,6 +61,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 import { FlightData } from "../modules/flightData";
 import { FlightCondition } from "../modules/flightCondition";
+import { ViewSetting } from "../modules/viewSetting";
 import plotly from "plotly.js-dist-min";
 
 const MODEL_LENGTH = 100;
@@ -76,12 +77,19 @@ const props = defineProps({
     type: Object as PropType<FlightCondition>,
     required: true,
   },
+  viewSetting: {
+    type: Object as PropType<ViewSetting>,
+    required: true,
+  },
 });
 
 const view = ref<HTMLDivElement>();
 const heightGraph = ref<HTMLDivElement>();
 
 let rocketObject: THREE.Group;
+let globalAxis = new THREE.AxesHelper(MAX_CAMERA_DISTANCE);
+let rocketAxis = new THREE.AxesHelper(MODEL_LENGTH / 3);
+
 let flightStep = ref(0);
 let playbackSpeed = ref(1.0);
 let play = ref(true);
@@ -171,6 +179,8 @@ const loadRocketModel = (scene: THREE.Scene, modelUrl: string, textureUrl?: stri
       });
     }
 
+    obj.add(rocketAxis);
+
     scene.add(obj);
   });
 };
@@ -225,6 +235,11 @@ watch(flightData, () => {
   plotFlightData();
 });
 
+watch(props.viewSetting, (setting) => {
+  globalAxis.visible = setting.drawGlobalAxis;
+  rocketAxis.visible = setting.drawModelAxis;
+});
+
 onMounted(() => {
   if (!view.value) {
     return;
@@ -234,7 +249,7 @@ onMounted(() => {
 
   // Initialize scene
   const scene = new THREE.Scene();
-  scene.add(new THREE.AxesHelper(MAX_CAMERA_DISTANCE));
+  scene.add(globalAxis);
 
   // Initialize light
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
