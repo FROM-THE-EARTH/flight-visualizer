@@ -28,8 +28,8 @@ let flightCondition = ref<FlightCondition>({
   azimuth: 0,
 });
 let viewSetting = ref<ViewSetting>({
-  drawGlobalAxis: true,
-  drawModelAxis: true,
+  drawGlobalAxes: true,
+  drawModelAxes: true,
 });
 
 let csvFileName = ref<string>();

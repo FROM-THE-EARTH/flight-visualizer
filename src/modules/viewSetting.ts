@@ -1,4 +1,4 @@
 export type ViewSetting = {
-    drawGlobalAxis: boolean
-    drawModelAxis: boolean
+    drawGlobalAxes: boolean
+    drawModelAxes: boolean
 }

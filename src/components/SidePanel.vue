@@ -16,12 +16,12 @@
       <p class="lead m-0">View setting</p>
       <div class="ms-1">
         <div class="form-check form-switch">
-          <label class="form-check-label">Draw global axis</label>
-          <input class="form-check-input" type="checkbox" v-model="props.viewSetting.drawGlobalAxis" />
+          <label class="form-check-label">Global axes</label>
+          <input class="form-check-input" type="checkbox" v-model="props.viewSetting.drawGlobalAxes" />
         </div>
         <div class="form-check form-switch">
-          <label class="form-check-label">Draw model axis</label>
-          <input class="form-check-input" type="checkbox" v-model="props.viewSetting.drawModelAxis" />
+          <label class="form-check-label">Model axes</label>
+          <input class="form-check-input" type="checkbox" v-model="props.viewSetting.drawModelAxes" />
         </div>
       </div>
     </div>

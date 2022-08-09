@@ -87,8 +87,8 @@ const view = ref<HTMLDivElement>();
 const heightGraph = ref<HTMLDivElement>();
 
 let rocketObject: THREE.Group;
-let globalAxis = new THREE.AxesHelper(MAX_CAMERA_DISTANCE);
-let rocketAxis = new THREE.AxesHelper(MODEL_LENGTH / 3);
+let globalAxes = new THREE.AxesHelper(MAX_CAMERA_DISTANCE);
+let rocketAxes = new THREE.AxesHelper(MODEL_LENGTH / 3);
 
 let flightStep = ref(0);
 let playbackSpeed = ref(1.0);
@@ -179,7 +179,7 @@ const loadRocketModel = (scene: THREE.Scene, modelUrl: string, textureUrl?: stri
       });
     }
 
-    obj.add(rocketAxis);
+    obj.add(rocketAxes);
 
     scene.add(obj);
   });
@@ -236,8 +236,8 @@ watch(flightData, () => {
 });
 
 watch(props.viewSetting, (setting) => {
-  globalAxis.visible = setting.drawGlobalAxis;
-  rocketAxis.visible = setting.drawModelAxis;
+  globalAxes.visible = setting.drawGlobalAxes;
+  rocketAxes.visible = setting.drawModelAxes;
 });
 
 onMounted(() => {
@@ -249,7 +249,7 @@ onMounted(() => {
 
   // Initialize scene
   const scene = new THREE.Scene();
-  scene.add(globalAxis);
+  scene.add(globalAxes);
 
   // Initialize light
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
@@ -265,7 +265,7 @@ onMounted(() => {
 
   // Initialize renderer
   const renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setClearColor(0x101020, 1.0);
+  renderer.setClearColor(0x101020, 0.0);
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(view.value.offsetWidth, view.value.offsetHeight);
   view.value.appendChild(renderer.domElement);
@@ -313,6 +313,7 @@ onMounted(() => {
 
 #view {
   height: 60%;
+  background: linear-gradient(0deg, rgb(34, 58, 100), rgb(9, 0, 26));
 }
 
 #height-graph {
