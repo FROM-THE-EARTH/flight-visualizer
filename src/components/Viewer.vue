@@ -268,7 +268,7 @@ onMounted(() => {
 
   // Initialize camera
   const camera = new THREE.PerspectiveCamera(60, view.value.offsetWidth / view.value.offsetHeight);
-  camera.position.set(MODEL_LENGTH / 1.6, MODEL_LENGTH / 1.6, MODEL_LENGTH / 1.6);
+  camera.position.set(MODEL_LENGTH / 0.8, MODEL_LENGTH / 2, -MODEL_LENGTH / 4);
   camera.lookAt(scene.position);
 
   // Initialize renderer
