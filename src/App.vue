@@ -5,12 +5,20 @@
     </div>
     <div id="main" class="row g-0">
       <div class="col-2">
-        <SidePanel @csv-load="onCSVLoad" :flight-condition="flightCondition" :view-setting="viewSetting" />
+        <SidePanel @csv-load="onCSVLoad" :flight-condition="flightCondition" :viewer-setting="viewerSetting" />
       </div>
       <div class="col-10">
-        <Viewer ref="viewer" :flightData="flightData" :flight-condition="flightCondition" :view-setting="viewSetting" />
+        <Viewer
+          ref="viewer"
+          :flightData="flightData"
+          :flight-condition="flightCondition"
+          :viewer-setting="viewerSetting"
+        />
       </div>
     </div>
+    <footer class="text-center">
+      Copyright © <a class="text-white" href="https://github.com/FROM-THE-EARTH">FROM THE EARTH</a>
+    </footer>
   </div>
 </template>
 
@@ -20,16 +28,17 @@ import SidePanel from "./components/SidePanel.vue";
 import Viewer from "./components/Viewer.vue";
 import { FlightData } from "./modules/flightData";
 import { FlightCondition } from "./modules/flightCondition";
-import { ViewSetting } from "./modules/viewSetting";
+import { ViewerSetting } from "./modules/viewerSetting";
 
 let flightData = ref<FlightData>();
 let flightCondition = ref<FlightCondition>({
   launchAngle: 70,
   azimuth: 0,
+  bodyRolling: 0,
 });
-let viewSetting = ref<ViewSetting>({
-  drawGlobalAxis: true,
-  drawModelAxis: true,
+let viewerSetting = ref<ViewerSetting>({
+  drawGlobalAxes: true,
+  drawModelAxes: true,
 });
 
 let csvFileName = ref<string>();
@@ -54,6 +63,12 @@ const onCSVLoad = (data: FlightData, filename: string) => {
 }
 
 #main {
-  height: calc(100% - 50px);
+  height: calc(100% - 90px);
+}
+
+footer {
+  height: 40px;
+  line-height: 40px;
+  background-color: #282828;
 }
 </style>
