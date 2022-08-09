@@ -16,6 +16,9 @@
         />
       </div>
     </div>
+    <footer class="text-center">
+      Copyright © <a class="text-white" href="https://github.com/FROM-THE-EARTH">FROM THE EARTH</a>
+    </footer>
   </div>
 </template>
 
@@ -60,6 +63,12 @@ const onCSVLoad = (data: FlightData, filename: string) => {
 }
 
 #main {
-  height: calc(100% - 50px);
+  height: calc(100% - 90px);
+}
+
+footer {
+  height: 40px;
+  line-height: 40px;
+  background-color: #282828;
 }
 </style>
