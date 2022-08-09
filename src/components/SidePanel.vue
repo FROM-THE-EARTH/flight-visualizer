@@ -15,15 +15,15 @@
       </div>
     </div>
     <div class="ms-2 mt-4">
-      <p class="lead m-0">View setting</p>
+      <p class="lead m-0">Viewer Setting</p>
       <div class="ms-1">
         <div class="form-check form-switch">
           <label class="form-check-label">Global axes</label>
-          <input class="form-check-input" type="checkbox" v-model="props.viewSetting.drawGlobalAxes" />
+          <input class="form-check-input" type="checkbox" v-model="props.viewerSetting.drawGlobalAxes" />
         </div>
         <div class="form-check form-switch">
           <label class="form-check-label">Model axes</label>
-          <input class="form-check-input" type="checkbox" v-model="props.viewSetting.drawModelAxes" />
+          <input class="form-check-input" type="checkbox" v-model="props.viewerSetting.drawModelAxes" />
         </div>
       </div>
     </div>
@@ -35,15 +35,15 @@ import { computed } from "@vue/reactivity";
 import { ref, PropType } from "vue";
 import { FlightData } from "../modules/flightData";
 import { FlightCondition } from "../modules/flightCondition";
-import { ViewSetting } from "../modules/viewSetting";
+import { ViewerSetting } from "../modules/viewerSetting";
 
 const props = defineProps({
   flightCondition: {
     type: Object as PropType<FlightCondition>,
     required: true,
   },
-  viewSetting: {
-    type: Object as PropType<ViewSetting>,
+  viewerSetting: {
+    type: Object as PropType<ViewerSetting>,
     required: true,
   },
 });

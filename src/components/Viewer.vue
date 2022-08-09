@@ -61,7 +61,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { FlightData } from "../modules/flightData";
 import { FlightCondition } from "../modules/flightCondition";
-import { ViewSetting } from "../modules/viewSetting";
+import { ViewerSetting } from "../modules/viewerSetting";
 import plotly from "plotly.js-dist-min";
 
 const MODEL_LENGTH = 100;
@@ -77,8 +77,8 @@ const props = defineProps({
     type: Object as PropType<FlightCondition>,
     required: true,
   },
-  viewSetting: {
-    type: Object as PropType<ViewSetting>,
+  viewerSetting: {
+    type: Object as PropType<ViewerSetting>,
     required: true,
   },
 });
@@ -243,7 +243,7 @@ watch(flightData, () => {
   plotFlightData();
 });
 
-watch(props.viewSetting, (setting) => {
+watch(props.viewerSetting, (setting) => {
   globalAxes.visible = setting.drawGlobalAxes;
   rocketAxes.visible = setting.drawModelAxes;
 });
