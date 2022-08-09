@@ -58,7 +58,7 @@
 import { onMounted, ref, PropType, watch, toRefs } from "vue";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { FlightData } from "../modules/flightData";
 import { FlightCondition } from "../modules/flightCondition";
 import { ViewSetting } from "../modules/viewSetting";
@@ -97,13 +97,13 @@ let seeking = false;
 
 let previousLaunchAngle = 0;
 const setLaunchAngle = (angle: number) => {
-  rocketObject.rotateX((angle - previousLaunchAngle) * Deg2Rad);
+  rocketObject.rotateX(-(angle - previousLaunchAngle) * Deg2Rad);
   previousLaunchAngle = angle;
 };
 
 let previousAzimutgh = 0;
 const setAzimuth = (azimuth: number) => {
-  rocketObject.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), (azimuth - previousAzimutgh) * Deg2Rad);
+  rocketObject.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), -(azimuth - previousAzimutgh) * Deg2Rad);
   previousAzimutgh = azimuth;
 };
 
@@ -156,22 +156,22 @@ const stopSeek = () => {
 };
 
 const loadRocketModel = (scene: THREE.Scene, modelUrl: string, textureUrl?: string) => {
-  new OBJLoader().load(modelUrl, (obj) => {
-    rocketObject = obj;
+  new GLTFLoader().load(modelUrl, (obj) => {
+    rocketObject = obj.scene;
 
     // Scale
     const longitudinalLength = (() => {
-      const box = new THREE.Box3().setFromObject(obj);
+      const box = new THREE.Box3().setFromObject(rocketObject);
       return Math.max(box.max.x - box.min.x, box.max.y - box.min.y, box.max.z - box.min.z);
     })();
     const scale = MODEL_LENGTH / longitudinalLength;
-    obj.scale.set(scale, scale, scale);
+    rocketObject.scale.set(scale, scale, scale);
 
     setLaunchAngle(props.flightCondition.launchAngle);
 
     // Set texture
     if (textureUrl) {
-      obj.traverse((child) => {
+      rocketObject.traverse((child) => {
         var texture = new THREE.TextureLoader().load(textureUrl);
         if (child instanceof THREE.Mesh) {
           child.material.map = texture;
@@ -179,9 +179,9 @@ const loadRocketModel = (scene: THREE.Scene, modelUrl: string, textureUrl?: stri
       });
     }
 
-    obj.add(rocketAxes);
+    rocketObject.add(rocketAxes);
 
-    scene.add(obj);
+    scene.add(rocketObject);
   });
 };
 
@@ -265,7 +265,7 @@ onMounted(() => {
 
   // Initialize renderer
   const renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setClearColor(0x101020, 0.0);
+  renderer.setClearColor(0xffffff, 0.0);
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(view.value.offsetWidth, view.value.offsetHeight);
   view.value.appendChild(renderer.domElement);
@@ -276,7 +276,7 @@ onMounted(() => {
   orbitControls.minDistance = 0.1;
   orbitControls.maxDistance = MAX_CAMERA_DISTANCE;
 
-  loadRocketModel(scene, `${import.meta.env.BASE_URL}rocket.obj`, `${import.meta.env.BASE_URL}rocket_texture.png`);
+  loadRocketModel(scene, `${import.meta.env.BASE_URL}rocket.glb`, `${import.meta.env.BASE_URL}rocket_texture.png`);
 
   // Rendering loop
   let previousTime = 0;
