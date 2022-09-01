@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "bootstrap": "^5.2.0",
-    "plotly.js-dist-min": "^2.13.3",
+    "plotly.js-dist-min": "^2.14.0",
     "three": "^0.143.0",
     "vue": "^3.2.37"
   },

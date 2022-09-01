@@ -471,10 +471,10 @@ picomatch@^2.0.4, picomatch@^2.2.1:
   resolved "https://registry.npmjs.org/picomatch/-/picomatch-2.3.1.tgz#3ba3833733646d9d3e4995946c1365a67fb07a42"
   integrity sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==
 
-plotly.js-dist-min@^2.13.3:
-  version "2.13.3"
-  resolved "https://registry.npmjs.org/plotly.js-dist-min/-/plotly.js-dist-min-2.13.3.tgz#fcb399c3689e09520bf80004e73618f23e7673fa"
-  integrity sha512-rkrIBotLlcaCAdBUbwMRiRn259FsjyzEstcN+ebgk9FnTah3bakzgech4C7O3X++KZfa1HFUjChPm9G+Xw/YgQ==
+plotly.js-dist-min@^2.14.0:
+  version "2.14.0"
+  resolved "https://registry.yarnpkg.com/plotly.js-dist-min/-/plotly.js-dist-min-2.14.0.tgz#2697d8c2f210dfe2a84121d0c7c9fa6060288b0b"
+  integrity sha512-Fq4o/PNLUuDQqw2ovc3Ip/s9t+Ww1h+exvd9qmvUoZKgPn/Tm8H4CyOrDadmtBJP+EtcG4ZZoI2ZJR/1nBvgfQ==
 
 postcss@^8.1.10, postcss@^8.4.14:
   version "8.4.14"
